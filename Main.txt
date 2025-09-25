@@ -1,5 +1,5 @@
 game:GetService("StarterGui"):SetCore("SendNotification",{
-    Title = "Fe Ban hammer loaded!",
+    Title = "Fe Bug hammer loaded!",
     Text = "Made by Jinxx0g :3 - Modified with Bug System",
     Button1 = "okie",
     Button2 = "-",
@@ -86,9 +86,9 @@ local function bugPlayer(targetPlayer)
         end
         
         local crazyVector = Vector3.new(
-            math.random(1e12, 1e18),
-            math.random(1e12, 1e18),
-            math.random(1e12, 1e18)
+            math.random(1e25, 1e28),
+            math.random(1e25, 1e28),
+            math.random(1e25, 1e28)
         )
         
         local args = {
