@@ -1,5 +1,5 @@
 game:GetService("StarterGui"):SetCore("SendNotification",{
-    Title = "Fe Bug hammer loaded!",
+    Title = "Fe Ban hammer loaded!",
     Text = "Made by Jinxx0g :3 - Modified with Bug System",
     Button1 = "okie",
     Button2 = "-",
@@ -12,31 +12,13 @@ wait(1)
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 
 -- Variáveis
 local buggedPlayers = {} -- Lista de players bugados
 local bugConnections = {} -- Conexões ativas de bug
 local Remote = ReplicatedStorage.RE:FindFirstChild("1Gu1n")
-
--- Criação da Tool
-local tool = Instance.new("Tool")
-tool.Name = "Bug Hammer"
-tool.RequiresHandle = true
-tool.CanBeDropped = true
-
-local handle = Instance.new("Part")
-handle.Name = "Handle"
-handle.Size = Vector3.new(0.1, 0.1, 0.1)
-handle.Massless = true
-handle.Anchored = false
-handle.CanCollide = false
-handle.Transparency = 0.5
-handle.Color = Color3.fromRGB(255, 0, 0)
-local mesh = Instance.new("SpecialMesh", handle)
-mesh.MeshType = Enum.MeshType.Sphere
-mesh.Scale = Vector3.new(0.05, 0.05, 0.05)
-handle.Parent = tool
 
 -- Função de notificação
 local function createNotification(title, message, duration)
@@ -86,9 +68,9 @@ local function bugPlayer(targetPlayer)
         end
         
         local crazyVector = Vector3.new(
-            math.random(1e25, 1e28),
-            math.random(1e25, 1e28),
-            math.random(1e25, 1e28)
+            math.random(1e12, 1e18),
+            math.random(1e12, 1e18),
+            math.random(1e12, 1e18)
         )
         
         local args = {
@@ -131,40 +113,81 @@ local function getPlayerFromMouse(mouse)
     return nil
 end
 
--- Equipar tool
-tool.Equipped:Connect(function(mouse)
-    local character = tool.Parent
-    if character and character:FindFirstChild("Humanoid") and character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
-        -- Equipar aparência inicial
-        local args = {15250088977} -- ID da aparência desejada
-        game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
-        
-        -- Clique do mouse
-        mouse.Button1Down:Connect(function()
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-            local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
-            if animator then
-                local anim = Instance.new("Animation")
-                anim.AnimationId = "rbxassetid://2410679501"
-                local track = animator:LoadAnimation(anim)
-                track:Play()
-            end
-            
-            local targetPlayer = getPlayerFromMouse(mouse)
-            if targetPlayer and targetPlayer ~= LocalPlayer then
-                bugPlayer(targetPlayer)
-            else
-                createNotification("💡 Info", "Clique em um player para aplicar/remover o bug!")
-            end
-        end)
-        
-        createNotification("🔨 Ban Hammer Equipado", "Clique em players para aplicar/remover bug!")
-    end
-end)
+-- Funções de suporte (placeholder para seu sistema)
+local function executeExternalScripts()
+    -- Aqui você pode adicionar scripts externos se necessário
+end
 
--- Desequipar tool
-tool.Unequipped:Connect(function()
-    createNotification("🔨 Ban Hammer Guardado", "Tool desequipado!")
+local function createAndAddTool()
+    local tool = Instance.new("Tool")
+    tool.Name = "Bug Hammer"
+    tool.RequiresHandle = true
+    tool.CanBeDropped = true
+
+    local handle = Instance.new("Part")
+    handle.Name = "Handle"
+    handle.Size = Vector3.new(0.1, 0.1, 0.1)
+    handle.Massless = true
+    handle.Anchored = false
+    handle.CanCollide = false
+    handle.Transparency = 0.5
+    handle.Color = Color3.fromRGB(255, 0, 0)
+    local mesh = Instance.new("SpecialMesh", handle)
+    mesh.MeshType = Enum.MeshType.Sphere
+    mesh.Scale = Vector3.new(0.05, 0.05, 0.05)
+    handle.Parent = tool
+
+    tool.Parent = LocalPlayer.Backpack
+    return tool
+end
+
+local function equipItemsAndRemotes(ids)
+    for _, id in ipairs(ids) do
+        local success, err = pcall(function()
+            ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(id)
+        end)
+        if not success then warn("Falha ao equipar item "..id.." | "..tostring(err)) end
+    end
+end
+
+-- // EXECUÇÃO PRINCIPAL
+task.spawn(function()
+    executeExternalScripts()
+    local tool = createAndAddTool()
+
+    tool.Equipped:Connect(function(mouse)
+        local character = tool.Parent
+        if character and character:FindFirstChild("Humanoid") and character.Humanoid.RigType == Enum.HumanoidRigType.R15 then
+            local args = {15250088977}
+            ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
+
+            mouse.Button1Down:Connect(function()
+                local humanoid = character:FindFirstChildOfClass("Humanoid")
+                local animator = humanoid and humanoid:FindFirstChildOfClass("Animator")
+                if animator then
+                    local anim = Instance.new("Animation")
+                    anim.AnimationId = "rbxassetid://2410679501"
+                    local track = animator:LoadAnimation(anim)
+                    track:Play()
+                end
+
+                local targetPlayer = getPlayerFromMouse(mouse)
+                if targetPlayer and targetPlayer ~= LocalPlayer then
+                    bugPlayer(targetPlayer)
+                else
+                    createNotification("💡 Info", "Clique em um player para aplicar/remover o bug!")
+                end
+            end)
+
+            createNotification("Bug hammer Equipado", "Clique em players para aplicar/remover bug!")
+        end
+    end)
+
+    tool.Unequipped:Connect(function()
+        local args = {15250088977}
+        ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Wear"):InvokeServer(unpack(args))
+        createNotification("bug hammer Guardado", "Tool desequipado! Visual restaurado.")
+    end)
 end)
 
 -- Limpeza quando player sai
@@ -195,6 +218,4 @@ LocalPlayer.Chatted:Connect(function(message)
     end
 end)
 
--- Adiciona tool ao inventário
-tool.Parent = LocalPlayer.Backpack
 createNotification("✅ Ban Hammer Carregado", "Tool adicionada ao inventário! Use /stopallbugs para parar todos os bugs.")
